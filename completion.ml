@@ -67,7 +67,7 @@ let simple (e, r) =
          
 let select memo (e, r) =
   match
-    List.filter (fun (x, y) -> not (M.mem (x, y) memo || x = y)) e
+    List.filter (fun (x, y) -> not (M.mem (x, y) memo)) e
     |> List.sort (fun a b -> sizep a - sizep b)
   with
   | x::_ as e ->
@@ -78,10 +78,7 @@ let select memo (e, r) =
 let debug_print (e, r) =
   let () = print_endline "" in
   let () = print_endline "E" in
-  let () = List.map (fun (x, y) -> U.normal_form r x, U.normal_form r y) e
-           |> List.filter (fun (x, y) -> not (x = y))
-           |> T.print_pairs
-  in
+  let () = T.print_pairs e in
   let () = print_endline "R" in
   let () = T.print_pairs r in e, r
 
