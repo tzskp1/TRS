@@ -213,34 +213,31 @@ module Group =
         e * x --> x;
       ]
     let order = Orders.strict (Orders.rpo Orders.lex (fun sx sy -> sx = sy || sx = "i" || sy = "e"))
-    let () = axioms
-      |> critical_pairs 
-      |> print_pairs 
-    (* let () = 
-     *   match complete order axioms' with
-     *   | Success p ->
-     *      print_string "results: ";
-     *      print_pairs p
-     *   | Fail (lhs, rhs) ->
-     *      print_string "fail : ";
-     *      print_pairs [lhs, rhs] *)
-    let Success rules = complete order axioms
-    let () = print_pairs rules 
-    let check (s, t) =
-      let () = 
-      normal_form rules s
-      |> string_of_exp
-      |> print_endline;
-      normal_form rules t
-      |> string_of_exp
-      |> print_endline
-      in
-      normal_form rules s = normal_form rules t
-    let eqs = [
-        (i x) * x, x * (i x);
-      ]
-    let () = eqs
-             |> List.map check
-             |> List.map string_of_bool
-             |> List.iter print_endline
+    let () = 
+      match complete order axioms with
+      | Success p ->
+         print_string "results: ";
+         print_pairs p
+      | Fail (lhs, rhs) ->
+         print_string "fail : ";
+         print_pairs [lhs, rhs]
+    (* let Success rules = complete order axioms
+     * let () = print_pairs rules 
+     * let check (s, t) =
+     *   let () = 
+     *   normal_form rules s
+     *   |> string_of_exp
+     *   |> print_endline;
+     *   normal_form rules t
+     *   |> string_of_exp
+     *   |> print_endline
+     *   in
+     *   normal_form rules s = normal_form rules t
+     * let eqs = [
+     *     (i x) * x, x * (i x);
+     *   ]
+     * let () = eqs
+     *          |> List.map check
+     *          |> List.map string_of_bool
+     *          |> List.iter print_endline *)
   end
