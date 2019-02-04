@@ -21,17 +21,9 @@ let orient order (e, r) =
 
 let delete (e, r) =
   List.filter (fun (x, y) -> not (x = y)) e, r
-  (* match e with
-   * | (x, y) :: rest when x = y ->
-   *    rest, r
-   * | _ -> e, r *)
 
 let simplify_identity (e, r) =
   List.map (fun (x, y) -> U.normal_form r x, U.normal_form r y) e, r
-  (* match e with
-   * | (x, y) :: rest -> 
-   *    (U.normal_form r x, U.normal_form r y) :: rest, r
-   * | [] -> e, r *)
           
 let deduce (e, r) =
   U.critical_pairs r @ e,
