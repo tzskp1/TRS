@@ -130,6 +130,13 @@ let rec map f = function
   | Cons (x, lazy xs) ->
      Cons (f x, lazy (map f xs))
   | Nil -> Nil
+         
+let rec traverse = function
+  | Cons ([], lazy r) ->
+     traverse r
+  | Cons (r::_, _) ->
+     Some r
+  | Nil -> None
 
 let complete_lazy order eqs =
   let rec iter er =
@@ -142,18 +149,12 @@ let complete_lazy order eqs =
   in iter (eqs, [], M.empty)
 
 let rec check_eq eqs x y = 
-  let rec traverse = function
-    | Cons ([], lazy r) ->
-       traverse r
-    | Cons (r::_, _) ->
-       Some r
-    | Nil -> None
-  in
+  let redex = map U.rewrite eqs in
   x = y
-  || let redex = map U.rewrite eqs in
-     let norm_x = traverse (map (fun f -> f x) redex) in
-     let norm_y = traverse (map (fun f -> f y) redex) in
-     match norm_x, norm_y with
+  || match
+      traverse (map (fun f -> f x) redex),
+      traverse (map (fun f -> f y) redex)
+     with
      | Some _, None -> false
      | None, Some _ -> false
      | None, None -> false
