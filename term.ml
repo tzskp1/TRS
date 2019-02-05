@@ -1,8 +1,15 @@
 module U = Utils
-
+         
 type 'a exp =
   | Fun of 'a * 'a exp list
   | Var of 'a
+
+module Eq = struct
+  type t = string exp * string exp
+  let compare = compare
+end
+
+module M = Set.Make(Eq)
 
 let (-->) a b = (a, b)
       

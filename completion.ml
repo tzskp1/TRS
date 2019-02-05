@@ -1,9 +1,8 @@
 module U = Unification
+
 module T = Term
-module M = Set.Make(struct
-               type t = string T.exp * string T.exp
-               let compare = compare
-             end)
+
+module M = T.M
 
 type 'a result =
   | Success of ('a T.exp * 'a T.exp) list
