@@ -171,18 +171,5 @@ let rec normal_form eqs x =
     |> List.map (fun f -> f x)
     |> List.flatten
   with
-  | r :: _ ->
-     (* let () = 
-      *   print_newline ();
-      *   print_endline (T.string_of_exp r) in *)
-     normal_form eqs r
+  | r :: _ -> normal_form eqs r
   | [] -> x
-
-let rewrite_rel eqs (l, r) =
-  match
-    List.map rewrite eqs 
-    |> List.map (fun f -> f l)
-    |> List.find_opt (fun l' -> l' = r)
-  with 
-  | Some _ -> true
-  | None -> false

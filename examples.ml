@@ -34,12 +34,19 @@ module CombinatoryLogic =
     let ( * ) a b = Fun (".", [a;b])
     let k a b = (const "K" * a) * b
     let s x y z = ((const "S" * x) * y) * z
-    let () = [
+    let order = Orders.strict (Orders.rpo Orders.lex (fun sx sy -> sx = sy || sx = "K" || sy = "S"))
+    let axioms = [
         s x y z --> (x * z) * (y * z);
         k x y --> x;
       ]
-      |> critical_pairs 
-      |> print_pairs 
+    let () = 
+      match complete order axioms with
+      | Success p ->
+         print_string "results: ";
+         print_pairs p
+      | Fail (lhs, rhs) ->
+         print_string "fail : ";
+         print_pairs [lhs, rhs]
   end
 
 module Test1 = 
