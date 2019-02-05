@@ -33,10 +33,6 @@ let delete (e, r, memo) =
 
 let simplify_identity (e, r, memo) =
   List.map (fun (x, y) -> U.normal_form r x, U.normal_form r y) e, r, memo
-  (* match e with
-   * | (x, y) :: e ->
-   *    (U.normal_form r x, U.normal_form r y) :: e, r, memo
-   * | [] -> e, r, memo *)
 
 let deduce (e, r, memo) =
   U.critical_pairs r @ e,
@@ -51,27 +47,6 @@ let r_simplify (e, r, memo) =
      e, xy' :: rest, memo'
   | [] -> e, r, memo
 
-let l_simplify_org (e, r, memo) =
-  match (List.sort (fun a b -> sizep b - sizep a) r) with
-| (x, y) :: rest ->
-   begin match 
-     List.map
-       begin fun (l, r) ->
-       match U.rewrite (l, r) x, U.rewrite (x, y) l with
-       | u::_, [] -> Some u
-       | _, _ -> None
-       end
-       rest
-     |> List.find_opt (function Some _ -> true | None  -> false)
-   with
-   | Some (Some u) ->
-      (u, y) :: e, rest, memo
-   | None -> 
-      e, r, memo
-   | _ -> failwith "l_simplify"
-   end
-| [] -> e, r, memo
-      
 let l_simplify (e, r, memo) =
   let rec iter acc memo e = function
     | (x, y) :: rest ->
@@ -93,7 +68,7 @@ let l_simplify (e, r, memo) =
        end
     | [] -> e, acc, memo
   in iter [] memo e r
-         
+
 let select (e, r, memo) =
   sort_by_size e, r, memo
   
@@ -111,11 +86,10 @@ let rec filter_by_generality = function
         |> filter_by_generality
       end
   | [] -> []
-
-let symm_compare (l, r) (l', r') =
-  compare (l, l') (r, r') * compare (l, r') (r, l')
         
-let simple (e, r, memo) =
+let simplify_equations (e, r, memo) =
+  let symm_compare (l, r) (l', r') =
+    compare (l, l') (r, r') * compare (l, r') (r, l') in
   List.sort_uniq symm_compare e
   |> List.sort (fun a b -> if mgenp a b then 1 else -1)
   |> filter_by_generality
@@ -142,7 +116,7 @@ let step order er =
   |> deduce
   |> simplify_identity
   |> delete
-  |> simple
+  |> simplify_equations
 
 let complete order eqs =
   let rec iter er =
@@ -187,18 +161,8 @@ let complete_lazy order eqs =
   in iter (eqs, [], M.empty)
 
 let rec check_eq eqs (x, y) = 
-  (* let eqs = map (fun (x, y) -> let () = T.string_of_exp x ^ " " ^ T.string_of_exp y |> print_endline in x, y) eqs in *)
   let redex = map U.rewrite eqs
               |> map (fun f -> f x, f y) in
-  (* let redex = map (fun (x, y) ->
-   *                 let () =
-   *                   print_endline "x";
-   *                   List.map T.string_of_exp x
-   *                   |> List.iter print_endline;
-   *                   print_endline "y";
-   *                   List.map T.string_of_exp y
-   *                   |> List.iter print_endline
-   *                   in x, y) redex in *)
   let rec traverse = function
     | Cons (([], []), lazy r) ->
        traverse r
