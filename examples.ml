@@ -230,10 +230,12 @@ module Group =
      *      print_pairs [lhs, rhs] *)
     let rules = complete_lazy order axioms
     let eqs = [
-        (i x) * x, x * (i x);
+        (* (i x) * x, x * (i x); *)
+        i (i x), x;
+        (* i (x * y), i y * i x; *)
       ]
     let () = eqs
-             |> List.map (fun (x, y) -> check_eq rules x y)
+             |> List.map (check_eq rules)
              |> List.map string_of_bool
              |> List.iter print_endline
   end

@@ -16,12 +16,6 @@ exception Fail_exn of (string T.exp * string T.exp)
 
 let sizep (a, b) = T.size a * T.size b
 
-let cost p r memo =
-  U.critical_pairs (p::r)
-  |> List.filter (fun xy -> not (M.mem xy memo))
-  |> List.map sizep
-  |> List.fold_left ( * ) (sizep p)
-
 let orient order (e, r, memo) =
   match e with
   | (x, y) :: rest when order x y ->
@@ -81,7 +75,7 @@ let simple (e, r, memo) =
          
 let select (e, r, memo) =
   match
-    List.sort (fun a b -> cost a r memo - cost b r memo) e
+    List.sort (fun a b -> sizep a - sizep b) e
   with
   | x::_ as e -> e, r, M.add x memo
   | [] -> [], r, memo
@@ -143,18 +137,33 @@ let complete_lazy order eqs =
     match step order er with
     | [], r', _ -> of_list r'
     | e, r, memo ->
-       concat r (lazy (iter (e, r, memo)))
+       concat
+         (List.sort (fun a b -> sizep a - sizep b) r)
+         (lazy (iter (e, r, memo)))
   in iter (eqs, [], M.empty)
 
-let rec check_eq eqs x y = 
+let trivial x =
+  match x with
+  | T.Var _ -> true
+  | _ ->
+     match T.variables x with
+     | [] -> true
+     | _ -> false
+
+let rec check_eq eqs (x, y) = 
+  (* let eqs = map (fun (x, y) -> let () = T.string_of_exp x ^ " " ^ T.string_of_exp y |> print_endline in x, y) eqs in *)
   let redex = map U.rewrite eqs in
+  let next x =
+    if trivial x
+    then Some x
+    else traverse (map (fun f -> f x) redex)
+  in
   x = y
-  || match
-      traverse (map (fun f -> f x) redex),
-      traverse (map (fun f -> f y) redex)
-     with
-     | Some _, None -> false
-     | None, Some _ -> false
-     | None, None -> false
+  || match next x, next y with
+     | None, None -> failwith "error: check_eq"
      | Some x, Some y ->
-        check_eq eqs x y
+        check_eq eqs (x, y)
+     | Some x, None -> 
+        check_eq eqs (x, y)
+     | None, Some y ->
+        check_eq eqs (x, y)
