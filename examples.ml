@@ -187,20 +187,6 @@ module Ex619b =
       |> print_pairs 
   end
 
-let x = Var "x"
-let y = Var "y"
-let f x y = Fun ("f", [x;y])
-let t = f (f x x) x
-let pos = positions t
-let () = print_endline ""
-let rep = List.map (replace t y) pos
-let () = List.map string_of_exp rep
-         |> List.iter print_endline
-let subs = sub_terms t
-let () = List.map string_of_exp subs
-         |> List.iter print_endline
-       
-       
 module Group =
   struct
     let x = Var "x"
@@ -210,9 +196,9 @@ module Group =
     let i x = Fun ("i", [x])
     let e = Fun ("e", [])
     let axioms = [
-        (x * y) * z --> x * (y * z);
-        (i x) * x --> e;
         e * x --> x;
+        (i x) * x --> e;
+        (x * y) * z --> x * (y * z);
       ]
     let axioms' = [
         (x * y) * z --> x * (y * z);
@@ -220,19 +206,19 @@ module Group =
         e * x --> x;
       ]
     let order = Orders.strict (Orders.rpo Orders.lex (fun sx sy -> sx = sy || sx = "i" || sy = "e"))
-    (* let () = 
-     *   match complete order axioms with
-     *   | Success p ->
-     *      print_string "results: ";
-     *      print_pairs p
-     *   | Fail (lhs, rhs) ->
-     *      print_string "fail : ";
-     *      print_pairs [lhs, rhs] *)
+    let () = 
+      match complete order axioms with
+      | Success rules ->
+         print_string "results: ";
+         print_pairs rules
+      | Fail (lhs, rhs) ->
+         print_string "fail : ";
+         print_pairs [lhs, rhs]
     let rules = complete_lazy order axioms
     let eqs = [
-        (* (i x) * x, x * (i x); *)
+        (i x) * x, x * (i x);
         i (i x), x;
-        (* i (x * y), i y * i x; *)
+        i (x * y), i y * i x;
       ]
     let () = eqs
              |> List.map (check_eq rules)

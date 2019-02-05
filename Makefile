@@ -1,9 +1,9 @@
 all: examples
 
-orders.cmx: orders.ml term.cmx
+orders.cmx: orders.ml term.cmx unification.cmx
 unification.cmx: unification.ml utils.cmx term.cmx
-completion.cmx: completion.ml utils.cmx term.cmx unification.cmx
-examples: examples.ml utils.cmx term.cmx orders.cmx unification.cmx completion.cmx
+completion.cmx: completion.ml utils.cmx term.cmx unification.cmx orders.cmx
+examples: examples.ml utils.cmx term.cmx unification.cmx orders.cmx completion.cmx
 
 # rules
 OL := ocamllex

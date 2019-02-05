@@ -20,3 +20,11 @@ let rec rpo ext order s t =
   | T.Var _, _ -> false
   | T.Fun _, T.Var ts -> 
      List.mem ts (T.variables s)
+
+let more_general s t =
+  s = t
+  || let t' = Unification.rename (T.variables t) t in
+     match Unification.solve [s, t'] with
+     | Some b ->
+        b s = t'
+     | None -> false

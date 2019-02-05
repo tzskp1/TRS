@@ -99,6 +99,7 @@ let solve eqs =
   | substs -> Some (List.fold_left comp_subst (fun a -> a) substs)
 
 let critical_pair (l, r) (l', r') =
+  let l', r' = apply_eq (rename (variables_eqs [l, r])) (l', r') in
   let match' l r =
     let rec iter acc l = 
       if l = r
@@ -114,22 +115,15 @@ let critical_pair (l, r) (l', r') =
          [List.rev acc, unifier]
     in iter [] l
   in     
-  match match' l l' with
-  | (path, unifier) :: _ ->
-     Some (unifier r, T.replace (unifier l) (unifier r') path)
-  | [] -> None
+  match' l l'
+  |> List.map (fun (path, unifier) -> (unifier r, T.replace (unifier l) (unifier r') path))
+  |> List.filter (fun (x, y) -> not (x = y))
   
 let rec critical_pairs eqs =
-  let cp eq eq' =
-    let req' = apply_eq (rename (variables_eqs [eq])) eq'
-    in match critical_pair eq req' with
-       | Some x -> [x]
-       | None -> []
-  in
   eqs
   |> List.map
        begin fun eq -> 
-       List.map (cp eq) eqs
+       List.map (critical_pair eq) eqs
        |> List.flatten
        end
   |> List.flatten
