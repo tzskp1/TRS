@@ -143,9 +143,7 @@ let complete_lazy order eqs =
     match step order er with
     | [], r', _ -> of_list r'
     | e, r, memo ->
-       concat 
-       (List.filter (fun x -> M.mem x memo) r)
-       (lazy (iter (e, r, memo)))
+       concat r (lazy (iter (e, r, memo)))
   in iter (eqs, [], M.empty)
 
 let rec check_eq eqs x y = 
